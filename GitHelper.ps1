@@ -1,9 +1,11 @@
 ﻿# ============================================
 # Git Helper
-# Simple Git menu for non-command-line users
+# Git + FileSync helper for non-command-line users
 # ============================================
 
 Set-Location $PSScriptRoot
+
+$FileSyncScript = Join-Path $PSScriptRoot "FileSync.ps1"
 
 function Pause-Script {
     Write-Host ""
@@ -32,6 +34,40 @@ function Test-Git {
     return $true
 }
 
+function Run-FileSync {
+    Write-Host ""
+    Write-Host "Running FileSync.ps1..." -ForegroundColor Cyan
+    Write-Host ""
+
+    if (-not (Test-Path $FileSyncScript)) {
+        Write-Host "FileSync.ps1 was not found." -ForegroundColor Red
+        Write-Host "Expected location:" -ForegroundColor Yellow
+        Write-Host $FileSyncScript
+        return $false
+    }
+
+    try {
+        & $FileSyncScript
+
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host ""
+            Write-Host "File sync completed successfully!" -ForegroundColor Green
+            return $true
+        }
+        else {
+            Write-Host ""
+            Write-Host "FileSync.ps1 reported an error." -ForegroundColor Red
+            return $false
+        }
+    }
+    catch {
+        Write-Host ""
+        Write-Host "Could not run FileSync.ps1:" -ForegroundColor Red
+        Write-Host $_.Exception.Message -ForegroundColor Red
+        return $false
+    }
+}
+
 function Pull-Changes {
     Show-Header
 
@@ -40,14 +76,16 @@ function Pull-Changes {
 
     git pull
 
-    Write-Host ""
-
     if ($LASTEXITCODE -eq 0) {
+        Write-Host ""
         Write-Host "Pull completed successfully!" -ForegroundColor Green
+
+        Run-FileSync
     }
     else {
+        Write-Host ""
         Write-Host "The pull encountered a problem." -ForegroundColor Red
-        Write-Host "If there is a merge conflict, it may need to be resolved manually."
+        Write-Host "FileSync was not run."
     }
 
     Pause-Script
@@ -132,21 +170,46 @@ function Sync-Repository {
     Write-Host "Starting sync..." -ForegroundColor Cyan
     Write-Host ""
 
-    # Pull first
-    Write-Host "1/3 - Pulling latest changes..." -ForegroundColor Cyan
+    # --------------------------------------------
+    # Step 1: Pull
+    # --------------------------------------------
+
+    Write-Host "1/4 - Pulling latest changes..." -ForegroundColor Cyan
     Write-Host ""
 
     git pull
 
     if ($LASTEXITCODE -ne 0) {
         Write-Host ""
-        Write-Host "Pull failed. Stopping sync to avoid overwriting anything." -ForegroundColor Red
+        Write-Host "Pull failed." -ForegroundColor Red
+        Write-Host "FileSync was not run."
         Pause-Script
         return
     }
 
     Write-Host ""
-    Write-Host "2/3 - Checking for local changes..." -ForegroundColor Cyan
+    Write-Host "Pull completed successfully!" -ForegroundColor Green
+
+    # --------------------------------------------
+    # Step 2: File Sync
+    # --------------------------------------------
+
+    Write-Host ""
+    Write-Host "2/4 - Synchronizing files..." -ForegroundColor Cyan
+
+    $syncSuccess = Run-FileSync
+
+    if (-not $syncSuccess) {
+        Write-Host ""
+        Write-Host "File synchronization encountered a problem." -ForegroundColor Yellow
+    }
+
+    # --------------------------------------------
+    # Step 3: Check local changes
+    # --------------------------------------------
+
+    Write-Host ""
+    Write-Host "3/4 - Checking for local changes..." -ForegroundColor Cyan
     Write-Host ""
 
     $status = git status --porcelain
@@ -162,7 +225,8 @@ function Sync-Repository {
 
         if ([string]::IsNullOrWhiteSpace($message)) {
             Write-Host ""
-            Write-Host "No commit message entered. Stopping sync." -ForegroundColor Yellow
+            Write-Host "No commit message entered." -ForegroundColor Yellow
+            Write-Host "Stopping sync before pushing."
             Pause-Script
             return
         }
@@ -188,8 +252,12 @@ function Sync-Repository {
         Write-Host "Commit created!" -ForegroundColor Green
     }
 
+    # --------------------------------------------
+    # Step 4: Push
+    # --------------------------------------------
+
     Write-Host ""
-    Write-Host "3/3 - Pushing changes..." -ForegroundColor Cyan
+    Write-Host "4/4 - Pushing changes..." -ForegroundColor Cyan
     Write-Host ""
 
     git push
@@ -202,7 +270,8 @@ function Sync-Repository {
         Write-Host "==========================================" -ForegroundColor DarkGreen
     }
     else {
-        Write-Host "Push failed. Your changes are still committed locally." -ForegroundColor Yellow
+        Write-Host "Push failed." -ForegroundColor Yellow
+        Write-Host "Your changes are still committed locally."
     }
 
     Pause-Script
@@ -221,21 +290,22 @@ while ($true) {
 
     Write-Host "What would you like to do?" -ForegroundColor White
     Write-Host ""
+
     Write-Host "  [1] " -NoNewline -ForegroundColor Cyan
     Write-Host "Pull latest changes"
-    
+
     Write-Host "  [2] " -NoNewline -ForegroundColor Cyan
     Write-Host "Commit my changes"
-    
+
     Write-Host "  [3] " -NoNewline -ForegroundColor Cyan
     Write-Host "Push my commits"
-    
+
     Write-Host "  [4] " -NoNewline -ForegroundColor Green
-    Write-Host "Sync (Pull + Commit + Push)"
-    
+    Write-Host "Sync (Pull + FileSync + Commit + Push)"
+
     Write-Host "  [5] " -NoNewline -ForegroundColor Cyan
     Write-Host "Exit"
-    
+
     Write-Host ""
 
     $choice = Read-Host "Choose an option"
@@ -270,4 +340,3 @@ while ($true) {
         }
     }
 }
-
