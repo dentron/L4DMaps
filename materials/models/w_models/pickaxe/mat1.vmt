@@ -1,0 +1,5 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/w_models/pickaxe/mat1"
+	"$bumpmap" "models/w_models/pickaxe/mat1_normal"
+}

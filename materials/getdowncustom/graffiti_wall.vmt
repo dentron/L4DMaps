@@ -1,0 +1,8 @@
+DecalModulate
+{
+	"$basetexture" "getdowncustom/graffiti_wall"
+"$decal" "1"
+"$decalscale" "0.25"
+$vertexcolor 1
+$vertexalpha 1
+}

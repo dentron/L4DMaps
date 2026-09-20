@@ -1,0 +1,5 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/v_models/weapons/pickaxe/mat1"
+	"$bumpmap" "models/v_models/weapons/pickaxe/mat1_normal"
+}

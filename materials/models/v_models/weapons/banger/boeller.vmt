@@ -1,0 +1,5 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/v_models/weapons/banger/boeller"
+	"$bumpmap" "models/v_models/weapons/banger/boeller_normal"
+}

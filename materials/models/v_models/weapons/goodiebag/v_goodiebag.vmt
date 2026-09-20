@@ -1,0 +1,13 @@
+VertexLitGeneric
+{
+$baseTexture "models\v_models\weapons\goodiebag\v_goodiebag"
+$bumpmap "models\v_models\weapons\goodiebag\v_goodiebag_normal"
+
+$phongboost 1
+$phongexponent 70
+$phongfresnelranges "[0.1 1 5]"
+//$BASEMAPLUMINANCEPHONGMASK 1
+$halflambert 1
+$phong 0
+"GPU>=2?$phong" 1
+}

@@ -1,0 +1,5 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/BoellerBox/BoellerBox"
+	"$surfaceprop" "Wood_Crate"
+}

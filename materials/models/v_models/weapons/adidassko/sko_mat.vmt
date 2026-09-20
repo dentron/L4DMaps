@@ -1,0 +1,5 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/v_models/weapons/adidassko/sko_mat"
+	"$bumpmap" "models/v_models/weapons/adidassko/sko_mat"
+}

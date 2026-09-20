@@ -1,0 +1,8 @@
+DecalModulate
+{
+	"$basetexture" "getdowncustom/husgraffitti"
+$decal 1
+$vertexcolor 1
+$vertexalpha 1
+}
+
